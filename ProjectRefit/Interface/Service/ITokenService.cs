@@ -1,7 +1,6 @@
-﻿namespace ProjectRefit.Interface.Service
+﻿namespace ProjectRefit.Interface.Service;
+
+public interface ITokenService
 {
-    public interface ITokenService
-    {
-        Task<string> GetTokenAsync();
-    }
+    Task<string> GetTokenAsync();
 }

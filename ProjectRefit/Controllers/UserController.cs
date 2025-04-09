@@ -2,45 +2,44 @@
 using ProjectRefit.Input;
 using ProjectRefit.Interface.Service;
 
-namespace ProjectRefit.Controllers
+namespace ProjectRefit.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class UserController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class UserController : ControllerBase
+    public readonly IUserService _userService;
+
+    public UserController(IUserService userService)
     {
-        public readonly IUserService _userService;
+        _userService = userService;
+    }
 
-        public UserController(IUserService userService)
+    [HttpPost("Login")]
+    public async Task<IActionResult> Login(InputAutenticateUser inputAutenticateUser)
+    {
+        try
         {
-            _userService = userService;
+            await _userService.Login(inputAutenticateUser);
+            return Ok("Usuario logado!");
         }
-
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(InputAutenticateUser inputAutenticateUser)
+        catch (Exception ex)
         {
-            try
-            {
-                await _userService.Login(inputAutenticateUser);
-                return Ok("Usuario logado!");
-            }
-            catch (Exception ex) 
-            {
-                return BadRequest(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpGet("GetUser")]
-        public async Task<IActionResult> GetUser()
+    [HttpGet("GetUser")]
+    public async Task<IActionResult> GetUser()
+    {
+        try
         {
-            try
-            {
-                var user = await _userService.GetUser();
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var user = await _userService.GetUser();
+            return Ok(user);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 }

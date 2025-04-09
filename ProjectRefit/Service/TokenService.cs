@@ -1,42 +1,40 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using ProjectRefit.Input;
 using ProjectRefit.Interface.Refit;
 using ProjectRefit.Interface.Service;
 using Refit;
 
-namespace ProjectRefit.Service
+namespace ProjectRefit.Service;
+
+public class TokenService : ITokenService
 {
-    public class TokenService : ITokenService
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IMemoryCache _cache;
+
+    public TokenService(IServiceProvider serviceProvider, IMemoryCache cache)
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IMemoryCache _cache;
+        _serviceProvider = serviceProvider;
+        _cache = cache;
+    }
 
-        private const string CacheKey = "auth_token";
+    public async Task<string> GetTokenAsync()
+    {
+        if (_cache.TryGetValue("userLogged", out dynamic? userLogged) && !userLogged?.Expired)
+            return userLogged != null ? userLogged.Token : "";
 
-        public TokenService(IServiceProvider serviceProvider, IMemoryCache cache)
-        {
-            _serviceProvider = serviceProvider;
-            _cache = cache;
-        }
+        if (userLogged is null)
+            throw new Exception("Usuario não logado.");
 
-        public async Task<string> GetTokenAsync()
-        {
-            if (_cache.TryGetValue("userLogged", out dynamic userLogged))
-                    return userLogged.Token; //verificar se o toke esta expirado
+        var loginRequest = new InputAutenticateUser(userLogged?.Username, userLogged?.Password, 1);
 
-            _cache.TryGetValue("userActive", out dynamic userActive);
-            var loginRequest = new InputAutenticateUser(userActive.Username, userActive.Password, 1);
+        var harmonRefit = RestService.For<IUserRefit>("https://dummyjson.com");
 
-            var harmonRefit = RestService.For<IUserRefit>("https://dummyjson.com");
+        var response = await harmonRefit.Login(loginRequest);
+        string token = response.AccessToken;
 
-            var response = await harmonRefit.Login(loginRequest);
-            string token = response.AccessToken;
+        var expiration = TimeSpan.FromSeconds(60);
+        _cache.Set("userLogged", new { Username = userLogged?.Username, Password = userLogged?.Password, Token = response.AccessToken, Expired = false });
 
-            var expiration = TimeSpan.FromSeconds(60);
-            _cache.Set(CacheKey, token, expiration);
-
-            return token;
-        }
+        return token;
     }
 }

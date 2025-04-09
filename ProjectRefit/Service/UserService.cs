@@ -4,31 +4,29 @@ using ProjectRefit.Interface.Refit;
 using ProjectRefit.Interface.Service;
 using ProjectRefit.Output;
 
-namespace ProjectRefit.Service
+namespace ProjectRefit.Service;
+
+public class UserService : IUserService
 {
-    public class UserService : IUserService
+    private readonly IUserRefit _userRefit;
+    private readonly IMemoryCache _cache;
+
+    public UserService(IUserRefit userRefit, IMemoryCache cache)
     {
-        private readonly IUserRefit _userRefit;
-        private readonly IMemoryCache _cache;
+        _userRefit = userRefit;
+        _cache = cache;
+    }
 
-        public UserService(IUserRefit userRefit, IMemoryCache cache)
-        {
-            _userRefit = userRefit;
-            _cache = cache;
-        }
+    public async Task<OutputAutenticateUser> Login(InputAutenticateUser inputAutenticateUser)
+    {
+        var result = await _userRefit.Login(inputAutenticateUser);
+        _cache.Set("userLogged", new { Username = inputAutenticateUser.Username, Password = inputAutenticateUser.Password, Token = result.AccessToken });
 
-        public async Task<OutputAutenticateUser> Login(InputAutenticateUser inputAutenticateUser)
-        {
-            _cache.Set("userActive", new { Username = inputAutenticateUser.Username, Password = inputAutenticateUser.Password});
-            var result = await _userRefit.Login(inputAutenticateUser);
-            _cache.Set("userLogged", new { Username = inputAutenticateUser.Username, Password = inputAutenticateUser.Password, Token = result.AccessToken });
+        return result;
+    }
 
-            return result;
-        }
-
-        public dynamic GetUser()
-        {
-            return _userRefit.Me();
-        }
+    public dynamic GetUser()
+    {
+        return _userRefit.GetUser();
     }
 }
