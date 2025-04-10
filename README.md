@@ -1,7 +1,7 @@
 # API .NET 8 com Refit e Autenticação (Token + Refresh Token)
 Este projeto é uma API desenvolvida em C# com .NET 8, que demonstra a implementação da biblioteca Refit para simplificar o consumo de APIs REST por meio de interfaces fortemente tipadas.
 
-#🛠️ Tecnologias Utilizadas
+🛠️ # Tecnologias Utilizadas
 .NET 8
 Refit
 Token JWT
