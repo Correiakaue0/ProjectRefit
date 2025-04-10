@@ -19,22 +19,21 @@ public class TokenService : ITokenService
 
     public async Task<string> GetTokenAsync()
     {
-        if (_cache.TryGetValue("userLogged", out dynamic? userLogged) && !userLogged?.Expired)
+        _cache.TryGetValue("userLogged", out dynamic? userLogged);
+
+        if (userLogged != null && !userLogged?.Expired)
             return userLogged != null ? userLogged.Token : "";
 
         if (userLogged is null)
-            throw new Exception("Usuario não logado.");
-
-        var loginRequest = new InputAutenticateUser(userLogged?.Username, userLogged?.Password, 1);
+            return "";
 
         var harmonRefit = RestService.For<IUserRefit>("https://dummyjson.com");
 
-        var response = await harmonRefit.Login(loginRequest);
-        string token = response.AccessToken;
+        var inputRefreshToken = new InputRefreshToken(userLogged?.Token ?? "", 1);
+        var response = await harmonRefit.RefreshToken(inputRefreshToken);
 
-        var expiration = TimeSpan.FromSeconds(60);
-        _cache.Set("userLogged", new { Username = userLogged?.Username, Password = userLogged?.Password, Token = response.AccessToken, Expired = false });
+        _cache.Set("userLogged", new { Username = userLogged?.Username, Password = userLogged?.Password, Token = response.RefreshToken, Expired = false });
 
-        return token;
+        return response.RefreshToken;
     }
 }

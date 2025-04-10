@@ -6,5 +6,5 @@ namespace ProjectRefit.Interface.Service;
 public interface IUserService
 {
     Task<OutputAutenticateUser> Login(InputAutenticateUser inputAutenticateUser);
-    dynamic GetUser();
+    Task<dynamic> GetUser();
 }

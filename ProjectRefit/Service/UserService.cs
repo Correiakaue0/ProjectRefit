@@ -20,13 +20,13 @@ public class UserService : IUserService
     public async Task<OutputAutenticateUser> Login(InputAutenticateUser inputAutenticateUser)
     {
         var result = await _userRefit.Login(inputAutenticateUser);
-        _cache.Set("userLogged", new { Username = inputAutenticateUser.Username, Password = inputAutenticateUser.Password, Token = result.AccessToken });
+        _cache.Set("userLogged", new { Username = inputAutenticateUser.Username, Password = inputAutenticateUser.Password, Token = result.AccessToken, Expired = false });
 
         return result;
     }
 
-    public dynamic GetUser()
+    public async Task<dynamic> GetUser()
     {
-        return _userRefit.GetUser();
+        return await _userRefit.GetUser();
     }
 }
