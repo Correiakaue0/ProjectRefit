@@ -25,8 +25,5 @@ public class UserService : IUserService
         return result;
     }
 
-    public async Task<dynamic> GetUser()
-    {
-        return await _userRefit.GetUser();
-    }
+    public async Task<dynamic> GetUser() => await _userRefit.GetUser();   
 }
