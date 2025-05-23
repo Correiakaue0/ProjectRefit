@@ -7,8 +7,8 @@ using Refit;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddTransient<AuthTokenHandler>();
 
 builder.Services.AddRefitClient<IUserRefit>()
